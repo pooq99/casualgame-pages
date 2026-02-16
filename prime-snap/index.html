@@ -1,0 +1,703 @@
+<!-- build: prime-snap v0.1 --><!doctype html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" /><meta name="theme-color" content="#111827" /><title>Prime Snap v0.1</title><style>
+    :root {
+      --bg: #0b1020;
+      --panel: #141b34;
+      --text: #f8fafc;
+      --muted: #b8c1d9;
+      --accent: #22d3ee;
+      --good: #34d399;
+      --bad: #fb7185;
+      --chip-1: #fb923c;
+      --chip-2: #60a5fa;
+      --chip-3: #a78bfa;
+      --gold: #fbbf24;
+      --silver: #cbd5e1;
+      --bronze: #d97706;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      background: radial-gradient(120% 120% at 20% 10%, #172554 0%, var(--bg) 50%, #030712 100%);
+      color: var(--text);
+      overflow: hidden;
+    }
+    #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
+      gap: 10px;
+    }
+    .topbar {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .pill {
+      background: rgba(20, 27, 52, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #1f2a4a;
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: linear-gradient(180deg, #22d3ee, #0891b2); color: #03111a; }
+    .btn-danger { background: #be123c; }
+    .btn-ghost { background: #243155; color: #dbeafe; }
+    .card {
+      width: 100%;
+      max-width: 460px;
+      background: rgba(20, 27, 52, 0.86);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 14px;
+      backdrop-filter: blur(3px);
+    }
+    .rule {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      margin: 8px 0 12px;
+    }
+    .sub {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: -6px;
+      margin-bottom: 10px;
+    }
+    .timer-wrap {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .timer {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--good), #22d3ee, #f59e0b);
+      transform-origin: left center;
+    }
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .chip {
+      border: none;
+      border-radius: 16px;
+      height: 116px;
+      font-size: 42px;
+      font-weight: 900;
+      color: #0b1020;
+      cursor: pointer;
+    }
+    .chip:nth-child(1) { background: var(--chip-1); }
+    .chip:nth-child(2) { background: var(--chip-2); }
+    .chip:nth-child(3) { background: var(--chip-3); }
+    .footer {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 30;
+    }
+    .overlay.open { display: flex; }
+    .modal {
+      width: min(520px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .lb-list {
+      margin: 10px 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+    .lb-item {
+      background: #111b36;
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: grid;
+      grid-template-columns: 38px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      font-size: 14px;
+    }
+    .rank-1 { color: var(--gold); font-weight: 900; }
+    .rank-2 { color: var(--silver); font-weight: 900; }
+    .rank-3 { color: var(--bronze); font-weight: 900; }
+    .my-rank {
+      background: #0f2942;
+      border: 1px solid rgba(34, 211, 238, 0.45);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    .hidden { display: none !important; }
+    input[type="text"] {
+      width: 100%;
+      background: #111b36;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 14px;
+    }
+    #toast {
+      position: fixed;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.94);
+      color: #e2e8f0;
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 60;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; }
+  </style></head><body><div id="app"><div class="topbar"><div class="pill">v0.1</div><div class="pill">Best: <span id="bestScore">0</span></div><button id="topBtn" class="btn btn-ghost">Top</button></div><div class="card"><div class="rule" id="ruleLabel">Tap Start</div><div class="sub" id="statusLabel">Easy start: even first, harder rules later.</div><div class="timer-wrap"><div class="timer" id="timerBar"></div></div><div class="choices"><button class="chip" id="c0">0</button><button class="chip" id="c1">0</button><button class="chip" id="c2">0</button></div></div><div class="footer"><button id="startBtn" class="btn btn-primary">Start</button><button id="restartBtn" class="btn hidden">Restart</button><button id="reviveBtn" class="btn btn-danger hidden">Revive</button></div></div><div class="overlay" id="lbModal"><div class="modal"><div class="row"><h3 style="margin:0;">Global Top 10</h3><button id="closeModalBtn" class="btn">Close</button></div><div style="margin: 10px 0;"><div style="font-size:13px;color:#cbd5e1;margin-bottom:6px;">Nickname</div><input id="nickInput" type="text" maxlength="20" disabled /><div style="display:flex;gap:8px;margin-top:8px;"><button id="nickChangeBtn" class="btn">Change</button><button id="nickSaveBtn" class="btn btn-primary hidden">Save</button></div></div><ul id="lbList" class="lb-list"></ul><div id="myRank" class="my-rank">My rank: -</div></div></div><div id="toast"></div><script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import {
+      getAuth,
+      signInAnonymously,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      getDoc,
+      setDoc,
+      updateDoc,
+      deleteDoc,
+      serverTimestamp,
+      collection,
+      query,
+      orderBy,
+      limit,
+      getDocs,
+      runTransaction,
+      where,
+      getCountFromServer
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    const GAME_ID = "prime-snap";
+    const VERSION = "0.1";
+    const FIREBASE_CONFIG = window.GAME_FIREBASE_CONFIG || {
+      apiKey: "<api-key>",
+      authDomain: "<project-id>.firebaseapp.com",
+      projectId: "<project-id>",
+      appId: "<app-id>"
+    };
+    const ui = {
+      rule: document.getElementById("ruleLabel"),
+      status: document.getElementById("statusLabel"),
+      timer: document.getElementById("timerBar"),
+      chips: [document.getElementById("c0"), document.getElementById("c1"), document.getElementById("c2")],
+      startBtn: document.getElementById("startBtn"),
+      restartBtn: document.getElementById("restartBtn"),
+      reviveBtn: document.getElementById("reviveBtn"),
+      best: document.getElementById("bestScore"),
+      topBtn: document.getElementById("topBtn"),
+      modal: document.getElementById("lbModal"),
+      closeModalBtn: document.getElementById("closeModalBtn"),
+      lbList: document.getElementById("lbList"),
+      myRank: document.getElementById("myRank"),
+      nickInput: document.getElementById("nickInput"),
+      nickChangeBtn: document.getElementById("nickChangeBtn"),
+      nickSaveBtn: document.getElementById("nickSaveBtn"),
+      toast: document.getElementById("toast")
+    };
+    const ALL_RULES = [
+      { name: "PRIME", test: (n) => isPrime(n) },
+      { name: "EVEN", test: (n) => n % 2 === 0 },
+      { name: "MULTIPLE OF 3", test: (n) => n % 3 === 0 }
+    ];
+    const state = {
+      running: false,
+      gameOver: false,
+      modalOpen: false,
+      currentRule: null,
+      options: [0, 0, 0],
+      correctIdx: 0,
+      score: 0,
+      bestLocal: Number(localStorage.getItem("prime-snap-best") || "0"),
+      startMs: 0,
+      roundDeadline: 0,
+      roundDuration: 2600,
+      gameOvers: Number(localStorage.getItem("prime-snap-gameovers") || "0"),
+      lastInterstitialAt: Number(localStorage.getItem("prime-snap-last-int") || "0"),
+      reviveUsed: false,
+      uid: null,
+      nick: localStorage.getItem("prime-snap-nick") || randomAsciiNick(),
+      editingNick: false,
+      sortDirection: "desc",
+      rankType: "score",
+      firebaseReady: false
+    };
+    ui.best.textContent = String(state.bestLocal);
+    ui.nickInput.value = state.nick;
+    const app = initializeApp(FIREBASE_CONFIG);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      state.uid = user.uid;
+      state.firebaseReady = true;
+      await ensureGameMeta();
+      await ensurePlayerProfile();
+    });
+    signInAnonymously(auth).catch(() => toast("Offline mode: leaderboard unavailable"));
+    function isPrime(n) {
+      if (n < 2) return false;
+      if (n === 2) return true;
+      if (n % 2 === 0) return false;
+      for (let i = 3; i * i <= n; i += 2) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    }
+    function randomAsciiNick() {
+      const parts = ["Nova", "Bolt", "Dash", "Miko", "Rex", "Pico", "Luma", "Vex"];
+      const p = parts[Math.floor(Math.random() * parts.length)];
+      const num = Math.floor(Math.random() * 9000 + 1000);
+      return p + num;
+    }
+    function postToNative(event, payload = {}) {
+      const msg = JSON.stringify({ event, payload });
+      try {
+        if (window.AndroidBridge && typeof window.AndroidBridge.postMessage === "function") {
+          window.AndroidBridge.postMessage(msg);
+        } else if (
+          window.webkit &&
+          window.webkit.messageHandlers &&
+          window.webkit.messageHandlers.gameBridge
+        ) {
+          window.webkit.messageHandlers.gameBridge.postMessage({ event, payload });
+        }
+      } catch (_) {}
+    }
+    function handleNativeMessage(raw) {
+      let data = raw;
+      try {
+        if (typeof raw === "string") data = JSON.parse(raw);
+      } catch (_) {}
+      const event = data && data.event;
+      const payload = (data && data.payload) || {};
+      if (!event) return;
+      if (event === "INTERSTITIAL_CLOSED") {
+        return;
+      }
+      if (event === "REWARDED_GRANTED" && payload.rewardType === "revive") {
+        if (state.gameOver && !state.running && !state.modalOpen) {
+          reviveGame();
+        }
+        return;
+      }
+      if (event === "REWARDED_DENIED") {
+        toast("Reward not granted");
+      }
+    }
+    window.onNativeMessage = handleNativeMessage;
+    window.addEventListener("message", (e) => handleNativeMessage(e.data));
+    function toast(msg) {
+      ui.toast.textContent = msg;
+      ui.toast.classList.add("show");
+      setTimeout(() => ui.toast.classList.remove("show"), 1400);
+    }
+    function setButtons() {
+      ui.startBtn.classList.toggle("hidden", state.running || state.gameOver);
+      ui.restartBtn.classList.toggle("hidden", !state.gameOver);
+      ui.reviveBtn.classList.toggle("hidden", !state.gameOver || state.reviveUsed);
+    }
+    function resetRoundDuration() {
+      state.roundDuration = Math.max(1200, 2600 - state.score * 14);
+    }
+    function getActiveRules() {
+      if (state.score < 5) return [ALL_RULES[1]];
+      if (state.score < 12) return [ALL_RULES[1], ALL_RULES[2]];
+      return ALL_RULES;
+    }
+    function generateRound() {
+      const rules = getActiveRules();
+      let tries = 0;
+      while (tries < 80) {
+        tries++;
+        const rule = rules[Math.floor(Math.random() * rules.length)];
+        const nums = [
+          Math.floor(Math.random() * 28) + 2,
+          Math.floor(Math.random() * 28) + 2,
+          Math.floor(Math.random() * 28) + 2
+        ];
+        const hits = nums.map((n) => rule.test(n));
+        const count = hits.filter(Boolean).length;
+        if (count === 1) {
+          state.currentRule = rule;
+          state.options = nums;
+          state.correctIdx = hits.findIndex(Boolean);
+          return;
+        }
+      }
+      state.currentRule = ALL_RULES[1];
+      state.options = [11, 12, 14];
+      state.correctIdx = 1;
+    }
+    function renderRound() {
+      ui.rule.textContent = state.currentRule ? state.currentRule.name : "Tap Start";
+      ui.status.textContent = "Score: " + state.score;
+      for (let i = 0; i < 3; i++) {
+        ui.chips[i].textContent = String(state.options[i]);
+      }
+    }
+    function startGame() {
+      state.running = true;
+      state.gameOver = false;
+      state.score = 0;
+      state.startMs = performance.now();
+      state.reviveUsed = false;
+      ui.status.textContent = "Score: 0";
+      postToNative("GAME_START", {});
+      nextRound();
+      setButtons();
+    }
+    function nextRound() {
+      resetRoundDuration();
+      generateRound();
+      renderRound();
+      state.roundDeadline = performance.now() + state.roundDuration;
+    }
+    function onChoice(idx) {
+      if (!state.running || state.modalOpen) return;
+      if (idx === state.correctIdx) {
+        state.score += 1;
+        ui.status.textContent = "Score: " + state.score;
+        nextRound();
+        return;
+      }
+      endGame("wrong_tap");
+    }
+    function maybeRequestInterstitial() {
+      const now = Date.now();
+      const cooldownMs = 45000;
+      if (state.gameOvers <= 2) return;
+      const every = 2 + (state.gameOvers % 2);
+      if (state.gameOvers % every !== 0) return;
+      if (now - state.lastInterstitialAt < cooldownMs) return;
+      state.lastInterstitialAt = now;
+      localStorage.setItem("prime-snap-last-int", String(now));
+      postToNative("REQUEST_INTERSTITIAL", { reason: "game_over" });
+    }
+    async function endGame(reason) {
+      if (!state.running) return;
+      state.running = false;
+      state.gameOver = true;
+      const durationMs = Math.max(1, Math.floor(performance.now() - state.startMs));
+      ui.rule.textContent = "Game Over";
+      ui.status.textContent = "Final score: " + state.score + " (" + reason + ")";
+      ui.timer.style.transform = "scaleX(0)";
+      state.gameOvers += 1;
+      localStorage.setItem("prime-snap-gameovers", String(state.gameOvers));
+      postToNative("GAME_OVER", { score: state.score, durationMs });
+      maybeRequestInterstitial();
+      if (state.score > state.bestLocal) {
+        state.bestLocal = state.score;
+        localStorage.setItem("prime-snap-best", String(state.bestLocal));
+        ui.best.textContent = String(state.bestLocal);
+      }
+      setButtons();
+      await submitScore(state.score);
+    }
+    function reviveGame() {
+      if (state.reviveUsed) return;
+      state.reviveUsed = true;
+      state.running = true;
+      state.gameOver = false;
+      ui.status.textContent = "Revived! Score: " + state.score;
+      nextRound();
+      setButtons();
+    }
+    function tick(now) {
+      if (state.running) {
+        const left = state.roundDeadline - now;
+        const p = Math.max(0, Math.min(1, left / state.roundDuration));
+        ui.timer.style.transform = "scaleX(" + p.toFixed(4) + ")";
+        if (left <= 0) {
+          endGame("timeout");
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    ui.chips.forEach((chip, idx) => chip.addEventListener("click", () => onChoice(idx)));
+    ui.startBtn.addEventListener("click", startGame);
+    ui.restartBtn.addEventListener("click", startGame);
+    ui.reviveBtn.addEventListener("click", () => {
+      if (!state.gameOver || state.reviveUsed) return;
+      postToNative("REQUEST_REWARDED", { reason: "revive" });
+    });
+    ui.topBtn.addEventListener("click", openLeaderboard);
+    ui.closeModalBtn.addEventListener("click", closeLeaderboard);
+    ui.nickChangeBtn.addEventListener("click", () => {
+      state.editingNick = true;
+      ui.nickInput.disabled = false;
+      ui.nickInput.focus();
+      ui.nickSaveBtn.classList.remove("hidden");
+      ui.nickChangeBtn.classList.add("hidden");
+    });
+    ui.nickSaveBtn.addEventListener("click", async () => {
+      const next = ui.nickInput.value.trim();
+      if (next.length < 2 || next.length > 20) {
+        toast("Nickname length: 2-20");
+        return;
+      }
+      await saveNickname(next);
+    });
+    function openLeaderboard() {
+      state.modalOpen = true;
+      ui.modal.classList.add("open");
+      loadLeaderboard();
+    }
+    function closeLeaderboard() {
+      state.modalOpen = false;
+      ui.modal.classList.remove("open");
+    }
+    async function ensureGameMeta() {
+      const gameRef = doc(db, "games", GAME_ID);
+      const snap = await getDoc(gameRef);
+      if (snap.exists()) {
+        const d = snap.data();
+        state.sortDirection = d.sortDirection === "asc" ? "asc" : "desc";
+        state.rankType = d.rankType || "score";
+        return;
+      }
+      state.sortDirection = "desc";
+      state.rankType = "score";
+    }
+    async function ensurePlayerProfile() {
+      if (!state.uid) return;
+      const playerRef = doc(db, "games", GAME_ID, "players", state.uid);
+      const nickKey = state.nick.toLowerCase();
+      await runTransaction(db, async (tx) => {
+        const playerSnap = await tx.get(playerRef);
+        const nickRef = doc(db, "games", GAME_ID, "nicknames", nickKey);
+        const nickSnap = await tx.get(nickRef);
+        if (!nickSnap.exists()) {
+          tx.set(nickRef, { uid: state.uid, nick: state.nick, updatedAt: serverTimestamp() });
+        } else {
+          const nd = nickSnap.data();
+          if (nd.uid !== state.uid) throw new Error("Nickname taken");
+        }
+        if (!playerSnap.exists()) {
+          tx.set(playerRef, {
+            nick: state.nick,
+            bestRawValue: 0,
+            bestRankValue: 0,
+            updatedAt: serverTimestamp()
+          });
+        }
+      }).catch(() => {});
+      localStorage.setItem("prime-snap-nick", state.nick);
+    }
+    async function saveNickname(nextNick) {
+      if (!state.uid || !state.firebaseReady) {
+        toast("Auth required");
+        return;
+      }
+      const nextKey = nextNick.toLowerCase();
+      const prevNick = state.nick;
+      const prevKey = prevNick.toLowerCase();
+      try {
+        await runTransaction(db, async (tx) => {
+          const playerRef = doc(db, "games", GAME_ID, "players", state.uid);
+          const playerSnap = await tx.get(playerRef);
+          const nextRef = doc(db, "games", GAME_ID, "nicknames", nextKey);
+          const nextSnap = await tx.get(nextRef);
+          if (nextSnap.exists() && nextSnap.data().uid !== state.uid) {
+            throw new Error("Nickname already in use");
+          }
+          tx.set(nextRef, { uid: state.uid, nick: nextNick, updatedAt: serverTimestamp() }, { merge: true });
+          if (prevKey !== nextKey) {
+            const prevRef = doc(db, "games", GAME_ID, "nicknames", prevKey);
+            const prevSnap = await tx.get(prevRef);
+            if (prevSnap.exists() && prevSnap.data().uid === state.uid) {
+              tx.delete(prevRef);
+            }
+          }
+          if (playerSnap.exists()) {
+            tx.update(playerRef, { nick: nextNick, updatedAt: serverTimestamp() });
+          } else {
+            tx.set(playerRef, {
+              nick: nextNick,
+              bestRawValue: 0,
+              bestRankValue: 0,
+              updatedAt: serverTimestamp()
+            });
+          }
+          const lbRef = doc(db, "games", GAME_ID, "leaderboard", state.uid);
+          const lbSnap = await tx.get(lbRef);
+          if (lbSnap.exists()) {
+            tx.update(lbRef, { nick: nextNick, updatedAt: serverTimestamp() });
+          }
+        });
+        state.nick = nextNick;
+        localStorage.setItem("prime-snap-nick", state.nick);
+        state.editingNick = false;
+        ui.nickInput.value = state.nick;
+        ui.nickInput.disabled = true;
+        ui.nickSaveBtn.classList.add("hidden");
+        ui.nickChangeBtn.classList.remove("hidden");
+        toast("Nickname updated");
+        loadLeaderboard();
+      } catch (e) {
+        toast(e && e.message ? e.message : "Failed to update nickname");
+      }
+    }
+    async function submitScore(score) {
+      if (!state.uid || !state.firebaseReady) return;
+      const rankValue = score;
+      const rawValue = score;
+      const playerRef = doc(db, "games", GAME_ID, "players", state.uid);
+      const lbRef = doc(db, "games", GAME_ID, "leaderboard", state.uid);
+      try {
+        await runTransaction(db, async (tx) => {
+          const playerSnap = await tx.get(playerRef);
+          const lbSnap = await tx.get(lbRef);
+          let improved = true;
+          if (playerSnap.exists()) {
+            const prev = Number(playerSnap.data().bestRankValue || 0);
+            improved = state.sortDirection === "asc" ? rankValue < prev : rankValue > prev;
+          }
+          if (improved) {
+            tx.set(playerRef, {
+              nick: state.nick,
+              bestRawValue: rawValue,
+              bestRankValue: rankValue,
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+            tx.set(lbRef, {
+              uid: state.uid,
+              nick: state.nick,
+              rawValue,
+              rankValue,
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+          } else if (lbSnap.exists() && lbSnap.data().nick !== state.nick) {
+            tx.update(lbRef, { nick: state.nick, updatedAt: serverTimestamp() });
+          }
+        });
+      } catch (_) {}
+    }
+    function rankClass(n) {
+      if (n === 1) return "rank-1";
+      if (n === 2) return "rank-2";
+      if (n === 3) return "rank-3";
+      return "";
+    }
+    async function loadLeaderboard() {
+      ui.lbList.innerHTML = "<li class='lb-item'><span>-</span><span>Loading...</span><span>-</span></li>";
+      ui.myRank.textContent = "My rank: -";
+      if (!state.firebaseReady) {
+        ui.lbList.innerHTML = "<li class='lb-item'><span>-</span><span>Offline</span><span>-</span></li>";
+        return;
+      }
+      const dir = state.sortDirection === "asc" ? "asc" : "desc";
+      try {
+        const lbRef = collection(db, "games", GAME_ID, "leaderboard");
+        const topQ = query(lbRef, orderBy("rankValue", dir), limit(10));
+        const topSnap = await getDocs(topQ);
+        if (topSnap.empty) {
+          ui.lbList.innerHTML = "<li class='lb-item'><span>-</span><span>No scores yet</span><span>-</span></li>";
+        } else {
+          const rows = [];
+          let i = 1;
+          topSnap.forEach((d) => {
+            const v = d.data();
+            const cls = rankClass(i);
+            rows.push(
+              "<li class='lb-item'>" +
+                "<span class='" + cls + "'>" + i + "</span>" +
+                "<span>" + escapeHtml(v.nick || "Player") + "</span>" +
+                "<span>" + Number(v.rawValue || 0) + "</span>" +
+              "</li>"
+            );
+            i++;
+          });
+          ui.lbList.innerHTML = rows.join("");
+        }
+        if (state.uid) {
+          const myRef = doc(db, "games", GAME_ID, "leaderboard", state.uid);
+          const mySnap = await getDoc(myRef);
+          if (mySnap.exists()) {
+            const my = mySnap.data();
+            const myVal = Number(my.rankValue || 0);
+            const rankQ =
+              dir === "desc"
+                ? query(lbRef, where("rankValue", ">", myVal))
+                : query(lbRef, where("rankValue", "<", myVal));
+            const cntSnap = await getCountFromServer(rankQ);
+            const rank = cntSnap.data().count + 1;
+            ui.myRank.textContent = "My rank: #" + rank + " | " + (my.nick || "Player") + " | score " + Number(my.rawValue || 0);
+          } else {
+            ui.myRank.textContent = "My rank: unranked";
+          }
+        }
+      } catch (_) {
+        ui.lbList.innerHTML = "<li class='lb-item'><span>-</span><span>Failed to load</span><span>-</span></li>";
+      }
+    }
+    function escapeHtml(s) {
+      return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+    setButtons();
+    requestAnimationFrame(tick);
+  </script></body></html>
